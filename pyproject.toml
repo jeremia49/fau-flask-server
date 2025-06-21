@@ -1,0 +1,16 @@
+[project]
+name = "fau"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+dependencies = [
+    "flask>=3.1.1",
+    "gunicorn>=23.0.0",
+    "numexpr>=2.8.4",
+    "opencv-python",
+    "pandas>=2.3.0",
+    "psutil>=7.0.0",
+    "py-feat",
+    "scipy==1.11.1",
+]
+requires-python = ">=3.9"
