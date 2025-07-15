@@ -1,2 +1,2 @@
-# Emotion Detection using FAU (Facial Action Unit) 
+# Flask Server for Emotion Detection using Py-Feat
 
