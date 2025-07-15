@@ -6,9 +6,9 @@ readme = "README.md"
 dependencies = [
     "flask>=3.1.1",
     "gunicorn>=23.0.0",
-    "numexpr>=2.8.4",
     "opencv-python",
-    "py-feat>=0.6.2",
-    "scipy==1.11.1",
+    "pillow",
+    "deepface",
+    "tf-keras"
 ]
 requires-python = ">=3.9"

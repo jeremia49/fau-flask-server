@@ -7,6 +7,8 @@ RUN apt-get update \
       curl \
       ca-certificates \
       gcc libjpeg-dev zlib1g-dev \
+      libgl1-mesa-glx \
+      libglib2.0-0 \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -21,10 +23,9 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH:/root/.local/bin/"
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-
 RUN uv sync
-RUN python install_dep.py
 
 EXPOSE 8000
 
 CMD ["gunicorn", "--workers", "5", "--bind", "0.0.0.0:8000", "app:app"]
+# CMD ["sleep", "infinity"]
