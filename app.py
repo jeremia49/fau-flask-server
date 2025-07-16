@@ -3,25 +3,19 @@ from io import BytesIO
 from PIL import Image
 
 import numpy as np
-from deepface import DeepFace
+from feat import Detector
 
-def to_serializable(obj):
-    """
-    Recursively convert NumPy types to Python built-ins:
-      - np.ndarray → list
-      - np.generic   → native scalar (.item())
-      - dict, list   → recurse
-    """
-    if isinstance(obj, np.ndarray):
-        return obj.tolist()
-    if isinstance(obj, np.generic):
-        return obj.item()
-    if isinstance(obj, dict):
-        return {k: to_serializable(v) for k, v in obj.items()}
-    if isinstance(obj, (list, tuple)):
-        return [to_serializable(v) for v in obj]
-    return obj
+detector = Detector(device='cpu')
 
+FEAT_EMOTION_COLUMNS = [
+    "angry",
+    "disgust",
+    "fear",
+    "happy",
+    "sad",
+    "surprise",
+    "neutral",
+]
 
 app = Flask(__name__)
 
@@ -40,20 +34,29 @@ def upload():
     except Exception as e:
         return jsonify({"error": "Invalid JPEG data"}), 400
     
-    try:
-        objs = DeepFace.analyze(
-            img_path = np.array(img), actions = ['emotion'],
-        )
-    except Exception as e:
-        print(e)
-        return jsonify({"error": "No face detected"}), 404
+    img = img.resize((224, 224), resample=Image.LANCZOS)
     
-    if(len(objs) == 0):
-        return jsonify({"error": "No face detected"}), 404
+    try:
+        faces_out = detector.detect_faces(img)
+        if not faces_out or len(faces_out) == 0 or len(faces_out[0]) == 0 :
+            return jsonify({"error": "No faces detected"}), 404
+    except Exception as e:
+        return jsonify({"error": "No faces detected"}), 404
+    
+    try:
+        detected_landmarks = detector.detect_landmarks(img, faces_out)
+    except Exception as e:
+        return jsonify({"error": "Error detecting landmark"}), 404
+    
+    try:
+        emotions = detector.detect_emotions(img, faces_out, detected_landmarks)
+    except Exception as e:
+        return jsonify({"error": "Error detecting emotions"}), 404
+    
+    pred_label = FEAT_EMOTION_COLUMNS[np.argmax(emotions[0][0])]
     
     return jsonify({
-        "emotion": objs[0]['dominant_emotion'],
-        "stats": to_serializable(objs[0]['emotion'])
+        "emotion": pred_label,
     })
 
 if __name__ == "__main__":
